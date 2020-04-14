@@ -1,9 +1,8 @@
-#import pyaudio
 import wave
 from numpy import sin
 import struct
 import bz2
-from tqdm import trange
+from tqdm import tqdm
 import sys
 
 
@@ -20,23 +19,14 @@ else:
 
 wf = wave.open(WAVE_INPUT_FILENAME, 'rb')
 
-#p = pyaudio.PyAudio()
-
-#stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-#                channels=wf.getnchannels(),
-#                rate=wf.getframerate(),
-#                output=True)
-
 data0 = []
 frames = wf.getnframes()
-#data = wf.readframes(1)
+data = wf.readframes(frames)
 i = 0
 a = wf.getframerate() / 440
+b = struct.unpack(str(frames)+"h", data)
 
-for _ in trange(frames):
-    data = wf.readframes(1)
-    #stream.write(data)
-    f = struct.unpack("h", data)[0]
+for f in  tqdm(b):
     b = i / a
     c = b * 3.14159 * 2
     d = sin(c)*28670
@@ -44,11 +34,8 @@ for _ in trange(frames):
     S = (f - e)//16 + 128
     data0.append(S)
     i += 1
-    
 
-#stream.stop_stream()
-#stream.close()
-#p.terminate()
+
 print("read")
 
 data0 = b''.join([bytes.fromhex("%02X" % i) for i in data0])
