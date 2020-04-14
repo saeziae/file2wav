@@ -1,5 +1,5 @@
 import wave
-from numpy import sin
+from math import sin
 import struct
 import bz2
 from tqdm import tqdm
