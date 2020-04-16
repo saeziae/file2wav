@@ -11,7 +11,7 @@ if len(sys.argv) == 3:
     FILE_OUTPUT_FILENAME = sys.argv[2]
 elif len(sys.argv) == 2:
     WAVE_INPUT_FILENAME = sys.argv[1]
-    FILE_OUTPUT_FILENAME = sys.argv[1]+'.bin'
+    FILE_OUTPUT_FILENAME = sys.argv[1][:-4]
 else:
     print("format: <in file> [<out file>]")
     sys.exit()
@@ -26,7 +26,7 @@ i = 0
 a = wf.getframerate() / 440
 b = struct.unpack(str(frames)+"h", data)
 
-for f in  tqdm(b):
+for f in tqdm(b):
     b = i / a
     c = b * 3.14159 * 2
     d = sin(c)*28670
@@ -36,10 +36,12 @@ for f in  tqdm(b):
     i += 1
 
 
-print("read")
+print("already read")
+print("Decompressing")
+data1 = b''
+bz = bz2.BZ2Decompressor()
+for i in tqdm(data0):
+    data1 += bz.decompress(bytes().fromhex("%02X" % i), max_length=-1)
 
-data0 = b''.join([bytes.fromhex("%02X" % i) for i in data0])
-print("Decompress")
-data0 = bz2.decompress(data0)
 with open(FILE_OUTPUT_FILENAME, "wb") as f:
-    f.write(data0)
+    f.write(data1)

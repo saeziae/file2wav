@@ -3,7 +3,7 @@ import wave
 from math import sin
 import struct
 import bz2
-from tqdm import tqdm
+from tqdm import tqdm, trange
 import sys
 
 
@@ -22,10 +22,21 @@ FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 48000
 
+
+def readPart():
+    with open(IN_FILENAME, "rb") as f:
+        f.seek(0, 2)
+        t = f.tell()
+        f.seek(0, 0)
+        for _ in trange(t):
+            yield f.read(1)
+
+
 data_byte = b''
-with open(IN_FILENAME, "rb") as f:
-    print("COMPRESSING")
-    data_byte = bz2.compress(f.read(), compresslevel=9)
+bz = bz2.BZ2Compressor(9)
+for i in readPart():
+    data_byte += bz.compress(i)
+data_byte += bz.flush()
 
 data = []
 i = 0
